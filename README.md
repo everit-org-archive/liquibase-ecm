@@ -1,4 +1,5 @@
 osgi-liquibase-extender
 =======================
 
-A Component that can enhance DataSource services in the way that if the requester bundle contain liquibase changelog.xml, it will be applied on the database
+With the help of the component it is possible to update database schema easily
+from the different bundles.
