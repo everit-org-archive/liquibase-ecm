@@ -93,8 +93,8 @@
 <!--                                    <osgi.console>6667</osgi.console> -->
                                     </systemProperties>
                                     <vmOptions>
-                                        <!--<vmOption>-Xdebug</vmOption>
-                                        <vmOption>-Xrunjdwp:server=y\,transport=dt_socket\,address=4000\,suspend=n</vmOption>-->
+                                        <vmOption>-Xdebug</vmOption>
+                                        <vmOption>-Xrunjdwp:server=y\,transport=dt_socket\,address=4000\,suspend=n</vmOption>
                                     </vmOptions>
                                 </environment>
                             </environments>
@@ -245,7 +245,13 @@
             <version>${project.version}</version>
         </dependency>
 
-               <!-- Tested part -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>3.0.7</version>
+            <scope>provided</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.everit.osgi</groupId>
             <artifactId>org.everit.osgi.jdbc.dsf</artifactId>
