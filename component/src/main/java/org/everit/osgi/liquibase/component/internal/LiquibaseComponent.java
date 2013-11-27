@@ -24,16 +24,19 @@ package org.everit.osgi.liquibase.component.internal;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import javax.sql.DataSource;
 
 import liquibase.Liquibase;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 
@@ -88,7 +91,7 @@ public class LiquibaseComponent implements LiquibaseService {
     }
 
     @Override
-    public void process(Connection connection, BundleContext bundleContext, String changeLogFile) {
+    public void process(DataSource dataSource, BundleContext bundleContext, String changeLogFile) {
         BundleWiring bundleWiring = bundleContext.getBundle().adapt(BundleWiring.class);
         ClassLoader bundleClassLoader = bundleWiring.getClassLoader();
 
@@ -96,7 +99,7 @@ public class LiquibaseComponent implements LiquibaseService {
         try {
 
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(
-                    new JdbcConnection(connection));
+                    new JdbcConnection(dataSource.getConnection()));
             Liquibase liquibase =
                     new Liquibase(changeLogFile, new ClassLoaderResourceAccessor(bundleClassLoader), database);
 
@@ -115,6 +118,18 @@ public class LiquibaseComponent implements LiquibaseService {
         } catch (LiquibaseException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+            if (database != null) {
+                try {
+                    database.close();
+                } catch (DatabaseException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
         }
 
     }

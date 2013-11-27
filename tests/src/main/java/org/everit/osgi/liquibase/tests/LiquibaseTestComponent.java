@@ -22,7 +22,6 @@ package org.everit.osgi.liquibase.tests;
  */
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
@@ -30,7 +29,6 @@ import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.LiquibaseException;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -54,74 +52,59 @@ public class LiquibaseTestComponent {
 
     @Reference
     private LiquibaseService liquibaseService;
-
+    
     @Reference
     private DataSource dataSource;
-
+    
     private BundleContext bundleContext;
 
     @Activate
     public void activate(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
-
-    @Test
-    public void testSimpleDatabaseCreation() {
-
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
-            liquibaseService.process(connection, bundleContext, "META-INF/liquibase/changelog.xml");
-
-            dropAllTables(connection);
-
-            connection.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private void dropAllTables(Connection connection) throws LiquibaseException {
-        Database database =
-                DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-        database.setDefaultCatalogName("TEST");
-        database.setDefaultSchemaName("TEST");
-        Liquibase liquibase = new Liquibase(null, null, database);
-        liquibase.dropAll();
-    }
-
+    
     @Test
     @TestDuringDevelopment
-    public void testDoubleDatabaseCreation() {
-        Connection connection = null;
+    public void testDatabaseCreation() {
+        liquibaseService.process(dataSource, bundleContext, "META-INF/liquibase/changelog.xml");
+        
+        Database database = null;
         try {
-            connection = dataSource.getConnection();
-            liquibaseService.process(connection, bundleContext, "META-INF/liquibase/changelog.xml");
-
-            liquibaseService.process(connection, bundleContext, "META-INF/liquibase/changelog.xml");
-
-            dropAllTables(connection);
-
-        } catch (Exception e) {
+            Connection connection = dataSource.getConnection();
+            database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(
+                    new JdbcConnection(connection));
+            database.setDefaultCatalogName("TEST");
+            database.setDefaultSchemaName("public");
+            Liquibase liquibase =
+                    new Liquibase(null, null, database);      
+            liquibase.dropAll();
+            
+            database.close();
+        } catch(Exception e) {
             e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
+        }
+    }
+    
+    @Test
+    @TestDuringDevelopment
+    public void testProcessTwiceCreation() {
+        liquibaseService.process(dataSource, bundleContext, "META-INF/liquibase/changelog.xml");
+        liquibaseService.process(dataSource, bundleContext, "META-INF/liquibase/changelog.xml");
+        
+        Database database = null;
+        try {
+            Connection connection = dataSource.getConnection();
+            database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(
+                    new JdbcConnection(connection));
+            database.setDefaultCatalogName("TEST");
+            database.setDefaultSchemaName("public");
+            Liquibase liquibase =
+                    new Liquibase(null, null, database);      
+            liquibase.dropAll();
+            
+            database.close();
+        } catch(Exception e) {
+            e.printStackTrace();
         }
     }
 }
