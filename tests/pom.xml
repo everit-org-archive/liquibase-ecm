@@ -149,42 +149,42 @@
 
         <!-- Jetty with Http Service -->
 
-        <dependency>
-            <groupId>org.eclipse.jetty.osgi</groupId>
-            <artifactId>jetty-osgi-boot</artifactId>
-            <version>9.1.0.v20131115</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jetty-annotations</artifactId>
-                    <groupId>org.eclipse.jetty</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>org.eclipse.osgi</artifactId>
-                    <groupId>org.eclipse.osgi</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>org.eclipse.osgi.services</artifactId>
-                    <groupId>org.eclipse.osgi</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty.osgi</groupId>
-            <artifactId>jetty-httpservice</artifactId>
-            <version>9.1.0.v20131115</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>org.eclipse.osgi</artifactId>
-                    <groupId>org.eclipse.osgi</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+<!--         <dependency> -->
+<!--             <groupId>org.eclipse.jetty.osgi</groupId> -->
+<!--             <artifactId>jetty-osgi-boot</artifactId> -->
+<!--             <version>9.1.0.v20131115</version> -->
+<!--             <exclusions> -->
+<!--                 <exclusion> -->
+<!--                     <artifactId>jetty-annotations</artifactId> -->
+<!--                     <groupId>org.eclipse.jetty</groupId> -->
+<!--                 </exclusion> -->
+<!--                 <exclusion> -->
+<!--                     <artifactId>org.eclipse.osgi</artifactId> -->
+<!--                     <groupId>org.eclipse.osgi</groupId> -->
+<!--                 </exclusion> -->
+<!--                 <exclusion> -->
+<!--                     <artifactId>org.eclipse.osgi.services</artifactId> -->
+<!--                     <groupId>org.eclipse.osgi</groupId> -->
+<!--                 </exclusion> -->
+<!--             </exclusions> -->
+<!--         </dependency> -->
+<!--         <dependency> -->
+<!--             <groupId>org.eclipse.jetty.osgi</groupId> -->
+<!--             <artifactId>jetty-httpservice</artifactId> -->
+<!--             <version>9.1.0.v20131115</version> -->
+<!--             <exclusions> -->
+<!--                 <exclusion> -->
+<!--                     <artifactId>org.eclipse.osgi</artifactId> -->
+<!--                     <groupId>org.eclipse.osgi</groupId> -->
+<!--                 </exclusion> -->
+<!--             </exclusions> -->
+<!--         </dependency> -->
 
-        <dependency>
-            <groupId>org.ow2.spec.osgi</groupId>
-            <artifactId>ow2-httpservice-1.2-spec</artifactId>
-            <version>1.0.0</version>
-        </dependency>
+<!--         <dependency> -->
+<!--             <groupId>org.ow2.spec.osgi</groupId> -->
+<!--             <artifactId>ow2-httpservice-1.2-spec</artifactId> -->
+<!--             <version>1.0.0</version> -->
+<!--         </dependency> -->
 
         <!-- Transaction manager -->
 
