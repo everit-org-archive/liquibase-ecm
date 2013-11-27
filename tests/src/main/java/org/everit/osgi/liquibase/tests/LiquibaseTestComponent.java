@@ -76,7 +76,6 @@ public class LiquibaseTestComponent {
     }
 
     @Test
-    @TestDuringDevelopment
     public void testProcessTwiceCreation() {
         liquibaseService.process(dataSource, bundleContext, "META-INF/liquibase/changelog.xml");
 
