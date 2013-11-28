@@ -28,7 +28,7 @@ public class DatabaseMaintenanceException extends RuntimeException {
      */
     private static final long serialVersionUID = 1L;
 
-    public DatabaseMaintenanceException(String message, Throwable cause) {
+    public DatabaseMaintenanceException(final String message, final Throwable cause) {
         super(message, cause);
     }
 

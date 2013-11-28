@@ -48,8 +48,8 @@ import org.osgi.framework.BundleContext;
 
 @Component(name = "LiquibaseTest", immediate = true)
 @Service(value = LiquibaseTestComponent.class)
-@Properties({ @Property(name = "osgitest.testEngine", value = "junit4"),
-        @Property(name = "osgitest.testId", value = "liquibaseTest") })
+@Properties({ @Property(name = "eosgi.testEngine", value = "junit4"),
+        @Property(name = "eosgi.testId", value = "liquibaseTest") })
 public class LiquibaseTestComponent {
 
     @Reference
@@ -64,11 +64,48 @@ public class LiquibaseTestComponent {
     private BundleContext bundleContext;
 
     @Activate
-    public void activate(BundleContext bundleContext) {
+    public void activate(final BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 
+    public void bindConfigInit(final ConfigurationInitComponent configInit) {
+        this.configInit = configInit;
+    }
+
+    public void bindDataSource(final DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    public void bindLiquibaseService(final LiquibaseService liquibaseService) {
+        this.liquibaseService = liquibaseService;
+    }
+
+    private void dropAll() {
+        Database database = null;
+        try {
+            Connection connection = dataSource.getConnection();
+            database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(
+                    new JdbcConnection(connection));
+            database.setDefaultCatalogName("TEST");
+            database.setDefaultSchemaName("public");
+            Liquibase liquibase =
+                    new Liquibase(null, null, database);
+            liquibase.dropAll();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (database != null) {
+                try {
+                    database.close();
+                } catch (DatabaseException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     @Test
+    @TestDuringDevelopment
     public void testDatabaseCreation() {
         liquibaseService.process(dataSource, bundleContext, "META-INF/liquibase/changelog.xml");
 
@@ -121,29 +158,5 @@ public class LiquibaseTestComponent {
         }
 
         dropAll();
-    }
-
-    private void dropAll() {
-        Database database = null;
-        try {
-            Connection connection = dataSource.getConnection();
-            database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(
-                    new JdbcConnection(connection));
-            database.setDefaultCatalogName("TEST");
-            database.setDefaultSchemaName("public");
-            Liquibase liquibase =
-                    new Liquibase(null, null, database);
-            liquibase.dropAll();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (database != null) {
-                try {
-                    database.close();
-                } catch (DatabaseException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
     }
 }

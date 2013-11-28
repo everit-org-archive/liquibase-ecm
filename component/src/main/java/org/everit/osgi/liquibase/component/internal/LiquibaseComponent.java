@@ -69,12 +69,33 @@ public class LiquibaseComponent implements LiquibaseService {
     private LogService logService;
 
     @Activate
-    public void activate(Map<String, Object> componentProperties) {
+    public void activate(final Map<String, Object> componentProperties) {
         modified(componentProperties);
     }
 
+    private void dumpSQL(final Liquibase liquibase, final BundleContext bundleContext, final String changeLogFile)
+            throws LiquibaseException {
+        if (sqlDumpFolder != null) {
+            File folderFile = new File(sqlDumpFolder);
+            folderFile.mkdirs();
+            Bundle bundle = bundleContext.getBundle();
+            String symbolicName = bundle.getSymbolicName();
+            String fileName = symbolicName + "_" + new Date().getTime() + ".sql";
+            File outputFile = new File(folderFile, fileName);
+
+            try (FileWriter fw = new FileWriter(outputFile)) {
+                liquibase.update(null, fw);
+            } catch (IOException e) {
+                logService.log(LogService.LOG_ERROR, "Cannot dump SQL to " + outputFile.getAbsolutePath()
+                        + " during processing '" + changeLogFile
+                        + "' from the bundle " + bundleContext.getBundle().toString(), e);
+            }
+        }
+
+    }
+
     @Modified
-    public void modified(Map<String, Object> componentProperties) {
+    public void modified(final Map<String, Object> componentProperties) {
         Object tryUpdateObject = componentProperties.get(LiquibaseService.PROP_UPDATE);
         if (tryUpdateObject != null) {
             if (!(tryUpdateObject instanceof Boolean)) {
@@ -90,7 +111,7 @@ public class LiquibaseComponent implements LiquibaseService {
     }
 
     @Override
-    public void process(DataSource dataSource, BundleContext bundleContext, String changeLogFile) {
+    public void process(final DataSource dataSource, final BundleContext bundleContext, final String changeLogFile) {
         BundleWiring bundleWiring = bundleContext.getBundle().adapt(BundleWiring.class);
         ClassLoader bundleClassLoader = bundleWiring.getClassLoader();
 
@@ -128,27 +149,6 @@ public class LiquibaseComponent implements LiquibaseService {
                     logService.log(LogService.LOG_ERROR, "Cannot close database during processing '" + changeLogFile
                             + "' from the bundle " + bundleContext.getBundle().toString(), e);
                 }
-            }
-        }
-
-    }
-
-    private void dumpSQL(Liquibase liquibase, BundleContext bundleContext, String changeLogFile)
-            throws LiquibaseException {
-        if (sqlDumpFolder != null) {
-            File folderFile = new File(sqlDumpFolder);
-            folderFile.mkdirs();
-            Bundle bundle = bundleContext.getBundle();
-            String symbolicName = bundle.getSymbolicName();
-            String fileName = symbolicName + "_" + new Date().getTime() + ".sql";
-            File outputFile = new File(folderFile, fileName);
-
-            try (FileWriter fw = new FileWriter(outputFile)) {
-                liquibase.update(null, fw);
-            } catch (IOException e) {
-                logService.log(LogService.LOG_ERROR, "Cannot dump SQL to " + outputFile.getAbsolutePath()
-                        + " during processing '" + changeLogFile
-                        + "' from the bundle " + bundleContext.getBundle().toString(), e);
             }
         }
 

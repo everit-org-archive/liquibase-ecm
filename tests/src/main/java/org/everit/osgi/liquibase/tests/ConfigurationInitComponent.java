@@ -29,6 +29,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -42,7 +43,7 @@ public class ConfigurationInitComponent {
     private ConfigurationAdmin configAdmin;
 
     @Activate
-    public void activate() {
+    public void activate(final BundleContext bundleContext) {
         try {
             Dictionary<String, Object> xaDataSourceProps = new Hashtable<String, Object>();
             xaDataSourceProps.put(DataSourceFactory.JDBC_URL, "jdbc:h2:mem:test");
@@ -50,9 +51,9 @@ public class ConfigurationInitComponent {
                     xaDataSourceProps);
 
             Dictionary<String, Object> pooledDataSourceProps = new Hashtable<String, Object>();
-            xaDataSourceProps.put("xaDataSource.target", "(service.pid=" + xaDataSourcePid + ")");
+            pooledDataSourceProps.put("xaDataSource.target", "(service.pid=" + xaDataSourcePid + ")");
             getOrCreateConfiguration("org.everit.osgi.jdbc.commons.dbcp.ManagedDataSourceComponent",
-                    xaDataSourceProps);
+                    pooledDataSourceProps);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (InvalidSyntaxException e) {
@@ -60,18 +61,19 @@ public class ConfigurationInitComponent {
         }
     }
 
-    private String getOrCreateConfiguration(String factoryPid, Dictionary<String, Object> props) throws IOException,
+    public void bindConfigAdmin(final ConfigurationAdmin configAdmin) {
+        this.configAdmin = configAdmin;
+    }
+
+    private String getOrCreateConfiguration(final String factoryPid, final Dictionary<String, Object> props)
+            throws IOException,
             InvalidSyntaxException {
         Configuration[] configurations = configAdmin.listConfigurations("(service.factoryPid=" + factoryPid + ")");
-        if (configurations != null && configurations.length > 0) {
+        if ((configurations != null) && (configurations.length > 0)) {
             return configurations[0].getPid();
         }
         Configuration configuration = configAdmin.createFactoryConfiguration(factoryPid, null);
         configuration.update(props);
         return configuration.getPid();
-    }
-
-    public void bindConfigAdmin(ConfigurationAdmin configAdmin) {
-        this.configAdmin = configAdmin;
     }
 }
