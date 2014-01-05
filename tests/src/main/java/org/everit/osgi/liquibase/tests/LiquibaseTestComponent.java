@@ -107,14 +107,14 @@ public class LiquibaseTestComponent {
     @Test
     @TestDuringDevelopment
     public void testDatabaseCreation() {
-        liquibaseService.process(dataSource, bundleContext, "META-INF/liquibase/changelog.xml");
+        liquibaseService.process(dataSource, bundleContext.getBundle(), "META-INF/liquibase/changelog.xml");
 
         dropAll();
     }
 
     @Test
     public void testProcessTwiceCreation() {
-        liquibaseService.process(dataSource, bundleContext, "META-INF/liquibase/changelog.xml");
+        liquibaseService.process(dataSource, bundleContext.getBundle(), "META-INF/liquibase/changelog.xml");
 
         Connection connection = null;
         try {
@@ -134,7 +134,7 @@ public class LiquibaseTestComponent {
             }
         }
 
-        liquibaseService.process(dataSource, bundleContext, "META-INF/liquibase/changelog.xml");
+        liquibaseService.process(dataSource, bundleContext.getBundle(), "META-INF/liquibase/changelog.xml");
 
         try {
             connection = dataSource.getConnection();

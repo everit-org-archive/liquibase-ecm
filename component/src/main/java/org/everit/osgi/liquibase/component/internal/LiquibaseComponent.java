@@ -38,7 +38,6 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.ClassLoaderResourceAccessor;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -47,11 +46,10 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.everit.osgi.liquibase.bundle.OSGiResourceAccessor;
 import org.everit.osgi.liquibase.component.DatabaseMaintenanceException;
 import org.everit.osgi.liquibase.component.LiquibaseService;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.log.LogService;
 
 @Component(metatype = true, immediate = true)
@@ -73,12 +71,11 @@ public class LiquibaseComponent implements LiquibaseService {
         modified(componentProperties);
     }
 
-    private void dumpSQL(final Liquibase liquibase, final BundleContext bundleContext, final String changeLogFile)
+    private void dumpSQL(final Liquibase liquibase, final Bundle bundle, final String changeLogFile)
             throws LiquibaseException {
         if (sqlDumpFolder != null) {
             File folderFile = new File(sqlDumpFolder);
             folderFile.mkdirs();
-            Bundle bundle = bundleContext.getBundle();
             String symbolicName = bundle.getSymbolicName();
             String fileName = symbolicName + "_" + new Date().getTime() + ".sql";
             File outputFile = new File(folderFile, fileName);
@@ -88,7 +85,7 @@ public class LiquibaseComponent implements LiquibaseService {
             } catch (IOException e) {
                 logService.log(LogService.LOG_ERROR, "Cannot dump SQL to " + outputFile.getAbsolutePath()
                         + " during processing '" + changeLogFile
-                        + "' from the bundle " + bundleContext.getBundle().toString(), e);
+                        + "' from the bundle " + bundle.toString(), e);
             }
         }
 
@@ -111,43 +108,40 @@ public class LiquibaseComponent implements LiquibaseService {
     }
 
     @Override
-    public void process(final DataSource dataSource, final BundleContext bundleContext, final String changeLogFile) {
-        BundleWiring bundleWiring = bundleContext.getBundle().adapt(BundleWiring.class);
-        ClassLoader bundleClassLoader = bundleWiring.getClassLoader();
-
+    public void process(final DataSource dataSource, final Bundle bundle, final String changeLogFile) {
         Database database = null;
         try {
 
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(
                     new JdbcConnection(dataSource.getConnection()));
             Liquibase liquibase =
-                    new Liquibase(changeLogFile, new ClassLoaderResourceAccessor(bundleClassLoader), database);
+                    new Liquibase(changeLogFile, new OSGiResourceAccessor(bundle), database);
 
             List<ChangeSet> unrunChangeSets = liquibase.listUnrunChangeSets(null);
 
             if (unrunChangeSets.size() > 0) {
-                dumpSQL(liquibase, bundleContext, changeLogFile);
+                dumpSQL(liquibase, bundle, changeLogFile);
 
                 if (update) {
                     liquibase.update(null);
                 }
             } else {
                 logService.log(LogService.LOG_INFO, "Nothing to change in the database for bundle "
-                        + bundleContext.getBundle().toString());
+                        + bundle.toString());
             }
         } catch (LiquibaseException e) {
             throw new DatabaseMaintenanceException("Error during processing '" + changeLogFile + "' from the bundle "
-                    + bundleContext.getBundle().toString(), e);
+                    + bundle.toString(), e);
         } catch (SQLException e) {
             throw new DatabaseMaintenanceException("Error during processing '" + changeLogFile + "' from the bundle "
-                    + bundleContext.getBundle().toString(), e);
+                    + bundle.toString(), e);
         } finally {
             if (database != null) {
                 try {
                     database.close();
                 } catch (DatabaseException e) {
                     logService.log(LogService.LOG_ERROR, "Cannot close database during processing '" + changeLogFile
-                            + "' from the bundle " + bundleContext.getBundle().toString(), e);
+                            + "' from the bundle " + bundle.toString(), e);
                 }
             }
         }

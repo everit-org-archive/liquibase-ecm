@@ -23,7 +23,7 @@ package org.everit.osgi.liquibase.component;
 
 import javax.sql.DataSource;
 
-import org.osgi.framework.BundleContext;
+import org.osgi.framework.Bundle;
 
 public interface LiquibaseService {
 
@@ -31,5 +31,5 @@ public interface LiquibaseService {
 
     String PROP_SQL_DUMP_FOLDER = "sqlDumpFolder";
 
-    void process(DataSource dataSource, BundleContext bundleContext, String changeLogFile);
+    void process(DataSource dataSource, Bundle bundle, String changeLogFile);
 }
