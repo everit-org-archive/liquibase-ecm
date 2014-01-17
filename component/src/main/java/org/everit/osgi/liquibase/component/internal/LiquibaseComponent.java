@@ -81,7 +81,7 @@ public class LiquibaseComponent implements LiquibaseService {
             File outputFile = new File(folderFile, fileName);
 
             try (FileWriter fw = new FileWriter(outputFile)) {
-                liquibase.update(null, fw);
+                liquibase.update((String) null, fw);
             } catch (IOException e) {
                 logService.log(LogService.LOG_ERROR, "Cannot dump SQL to " + outputFile.getAbsolutePath()
                         + " during processing '" + changeLogFile
@@ -117,13 +117,13 @@ public class LiquibaseComponent implements LiquibaseService {
             Liquibase liquibase =
                     new Liquibase(changeLogFile, new OSGiResourceAccessor(bundle), database);
 
-            List<ChangeSet> unrunChangeSets = liquibase.listUnrunChangeSets(null);
+            List<ChangeSet> unrunChangeSets = liquibase.listUnrunChangeSets((String) null);
 
             if (unrunChangeSets.size() > 0) {
                 dumpSQL(liquibase, bundle, changeLogFile);
 
                 if (update) {
-                    liquibase.update(null);
+                    liquibase.update((String) null);
                 }
             } else {
                 logService.log(LogService.LOG_INFO, "Nothing to change in the database for bundle "
