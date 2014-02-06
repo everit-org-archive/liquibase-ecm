@@ -55,8 +55,7 @@ import org.osgi.service.log.LogService;
 @Component(metatype = true, immediate = true)
 @Properties({
         @Property(name = LiquibaseService.PROP_UPDATE, boolValue = true),
-        @Property(name = LiquibaseService.PROP_SQL_DUMP_FOLDER),
-        @Property(name = "logService.target") })
+        @Property(name = LiquibaseService.PROP_SQL_DUMP_FOLDER), @Property(name = "logService.target") })
 @Service
 public class LiquibaseComponent implements LiquibaseService {
 
@@ -89,6 +88,7 @@ public class LiquibaseComponent implements LiquibaseService {
                         + "' from the bundle " + bundle.toString(), e);
             }
         }
+
     }
 
     @Modified
@@ -98,16 +98,13 @@ public class LiquibaseComponent implements LiquibaseService {
             if (!(tryUpdateObject instanceof Boolean)) {
                 throw new RuntimeException("Expected type for tryUpdate is Boolean but got "
                         + tryUpdateObject.getClass());
-            } else {
-                update = (Boolean) tryUpdateObject;
             }
+
         }
         Object sqlDumpFolderObject = componentProperties.get(LiquibaseService.PROP_SQL_DUMP_FOLDER);
         if (sqlDumpFolderObject != null) {
             sqlDumpFolder = String.valueOf(sqlDumpFolderObject);
         }
-        System.out.println("OOOOOOOOOOOOOOO " + sqlDumpFolder);
-
     }
 
     @Override

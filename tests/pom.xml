@@ -51,7 +51,7 @@
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Import-Package>*</Import-Package>
             <Export-Package />
-            <EOSGi-TestNum>6</EOSGi-TestNum>
+            <EOSGi-TestNum>2</EOSGi-TestNum>
           </instructions>
         </configuration>
       </plugin>
