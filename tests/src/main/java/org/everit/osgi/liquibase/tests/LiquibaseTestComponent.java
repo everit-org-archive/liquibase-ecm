@@ -33,6 +33,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.resource.ResourceAccessor;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -40,11 +41,12 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.everit.osgi.dev.testrunner.TestDuringDevelopment;
+import org.everit.osgi.liquibase.component.DatabaseMaintenanceException;
 import org.everit.osgi.liquibase.component.LiquibaseService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 @Component(name = "LiquibaseTest", immediate = true)
 @Service(value = LiquibaseTestComponent.class)
@@ -55,17 +57,33 @@ public class LiquibaseTestComponent {
     @Reference
     private ConfigurationInitComponent configInit;
 
-    @Reference
+    @Reference(bind = "bindLiquibaseService", target = "(sqlDumpFolder=*)")
     private LiquibaseService liquibaseService;
+
+    @Reference(bind = "bindLiquibaseServiceWithFalseUpdateProp", target = "(update=false)")
+    private LiquibaseService liquibaseServiceWithFalseUpdateProp;
+
+    @Reference(bind = "bindLiquibaseServiceWithNotBooleanUpdateProp", target = "(update=notBoolean)")
+    private LiquibaseService liquibaseServiceWithNotBooleanUpdateProp;
+
+    @Reference(bind = "bindLiquibaseServiceWithNotCreatableTmpDirProp", target = "(sqlDumpFolder=null/?)")
+    private LiquibaseService liquibaseServiceWithNotCreatableTmpDirProp;
 
     @Reference
     private DataSource dataSource;
+
+    @Reference
+    private ConfigurationAdmin configAdmin;
 
     private BundleContext bundleContext;
 
     @Activate
     public void activate(final BundleContext bundleContext) {
         this.bundleContext = bundleContext;
+    }
+
+    public void bindConfigAdmin(final ConfigurationAdmin configAdmin) {
+        this.configAdmin = configAdmin;
     }
 
     public void bindConfigInit(final ConfigurationInitComponent configInit) {
@@ -80,6 +98,18 @@ public class LiquibaseTestComponent {
         this.liquibaseService = liquibaseService;
     }
 
+    public void bindLiquibaseServiceWithFalseUpdateProp(final LiquibaseService liquibaseService) {
+        liquibaseServiceWithFalseUpdateProp = liquibaseService;
+    }
+
+    public void bindLiquibaseServiceWithNotBooleanUpdateProp(final LiquibaseService liquibaseService) {
+        liquibaseServiceWithNotBooleanUpdateProp = liquibaseService;
+    }
+
+    public void bindLiquibaseServiceWithNotCreatableTmpDirProp(final LiquibaseService liquibaseService) {
+        liquibaseServiceWithNotCreatableTmpDirProp = liquibaseService;
+    }
+
     private void dropAll() {
         Database database = null;
         try {
@@ -89,7 +119,7 @@ public class LiquibaseTestComponent {
             database.setDefaultCatalogName("TEST");
             database.setDefaultSchemaName("public");
             Liquibase liquibase =
-                    new Liquibase(null, null, database);
+                    new Liquibase((String) null, (ResourceAccessor) null, database);
             liquibase.dropAll();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -105,10 +135,29 @@ public class LiquibaseTestComponent {
     }
 
     @Test
-    @TestDuringDevelopment
     public void testDatabaseCreation() {
         liquibaseService.process(dataSource, bundleContext.getBundle(), "META-INF/liquibase/changelog.xml");
+        dropAll();
+    }
 
+    @Test
+    public void testFalseUpdateProp() {
+        liquibaseServiceWithFalseUpdateProp.process(dataSource, bundleContext.getBundle(),
+                "META-INF/liquibase/changelog.xml");
+        dropAll();
+    }
+
+    @Test
+    public void testNotBooleanUpdateProp() {
+        liquibaseServiceWithNotBooleanUpdateProp.process(dataSource, bundleContext.getBundle(),
+                "META-INF/liquibase/changelog.xml");
+        dropAll();
+    }
+
+    @Test
+    public void testNotCreatableTmpDirName() {
+        liquibaseServiceWithNotCreatableTmpDirProp.process(dataSource, bundleContext.getBundle(),
+                "META-INF/liquibase/changelog.xml");
         dropAll();
     }
 
@@ -157,6 +206,18 @@ public class LiquibaseTestComponent {
             }
         }
 
+        dropAll();
+    }
+
+    @Test
+    public void testWrongChangelogSQL() {
+
+        try {
+            liquibaseService.process(dataSource, bundleContext.getBundle(), "META-INF/liquibase/wrongSQL.xml");
+            Assert.assertTrue(false);
+        } catch (DatabaseMaintenanceException e) {
+            Assert.assertTrue(true);
+        }
         dropAll();
     }
 }
