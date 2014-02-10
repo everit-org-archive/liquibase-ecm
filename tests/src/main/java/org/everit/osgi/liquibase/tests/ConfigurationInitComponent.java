@@ -29,6 +29,8 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.everit.osgi.liquibase.component.LiquibaseService;
+import org.junit.Assert;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
@@ -54,6 +56,36 @@ public class ConfigurationInitComponent {
             pooledDataSourceProps.put("xaDataSource.target", "(service.pid=" + xaDataSourcePid + ")");
             getOrCreateConfiguration("org.everit.osgi.jdbc.commons.dbcp.ManagedDataSourceComponent",
                     pooledDataSourceProps);
+
+            String tmpDirProperty = "java.io.tmpdir";
+            String tmpDir = System.getProperty(tmpDirProperty);
+            if (tmpDir == null) {
+                Assert.fail("User temp directory could not be retrieved");
+            }
+            Dictionary<String, Object> liquibaseComponentProps = new Hashtable<String, Object>();
+            liquibaseComponentProps.put(LiquibaseService.PROP_SQL_DUMP_FOLDER, tmpDir);
+            getOrCreateConfiguration("org.everit.osgi.liquibase.component.internal.LiquibaseComponent",
+                    liquibaseComponentProps);
+
+            Dictionary<String, Object> liquibaseComponentProps4 = new Hashtable<String, Object>();
+            liquibaseComponentProps4
+                    .put(LiquibaseService.PROP_SQL_DUMP_FOLDER, "null/?");
+            Configuration configuration4 = configAdmin.createFactoryConfiguration(
+                    "org.everit.osgi.liquibase.component.internal.LiquibaseComponent", null);
+            configuration4.update(liquibaseComponentProps4);
+
+            Dictionary<String, Object> liquibaseComponentProps2 = new Hashtable<String, Object>();
+            liquibaseComponentProps2.put(LiquibaseService.PROP_UPDATE, false);
+            Configuration configuration = configAdmin.createFactoryConfiguration(
+                    "org.everit.osgi.liquibase.component.internal.LiquibaseComponent", null);
+            configuration.update(liquibaseComponentProps2);
+
+            Dictionary<String, Object> liquibaseComponentProps3 = new Hashtable<String, Object>();
+            liquibaseComponentProps3.put(LiquibaseService.PROP_UPDATE, "notBoolean");
+            Configuration configuration3 = configAdmin.createFactoryConfiguration(
+                    "org.everit.osgi.liquibase.component.internal.LiquibaseComponent", null);
+            configuration3.update(liquibaseComponentProps3);
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (InvalidSyntaxException e) {
