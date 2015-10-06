@@ -27,7 +27,7 @@
 
   <groupId>org.everit.persistence</groupId>
   <artifactId>org.everit.persistence.liquibase.ecm</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
 
   <packaging>bundle</packaging>
 
