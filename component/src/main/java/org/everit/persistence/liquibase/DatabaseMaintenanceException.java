@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.everit.persistence.liquibase.ecm;
+package org.everit.persistence.liquibase;
 
 /**
  * Wraps exceptions that might occur during processes Liquibase changelog.
  */
 public class DatabaseMaintenanceException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 3092810305369564009L;
 
   public DatabaseMaintenanceException(final String message, final Throwable cause) {
     super(message, cause);

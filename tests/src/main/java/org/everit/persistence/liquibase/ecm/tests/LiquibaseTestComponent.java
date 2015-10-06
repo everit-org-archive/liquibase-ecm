@@ -30,8 +30,8 @@ import org.everit.osgi.ecm.annotation.ServiceRef;
 import org.everit.osgi.ecm.annotation.attribute.StringAttribute;
 import org.everit.osgi.ecm.annotation.attribute.StringAttributes;
 import org.everit.osgi.ecm.extender.ECMExtenderConstants;
-import org.everit.persistence.liquibase.ecm.DatabaseMaintenanceException;
-import org.everit.persistence.liquibase.ecm.LiquibaseService;
+import org.everit.persistence.liquibase.DatabaseMaintenanceException;
+import org.everit.persistence.liquibase.LiquibaseService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
@@ -47,7 +47,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
 
 /**
- * Test component that tests {@link LiquibaseService} functionlity.
+ * Test component that tests {@link LiquibaseService} functionality.
  */
 @Component(componentId = "LiquibaseTest", configurationPolicy = ConfigurationPolicy.IGNORE)
 @ProvideCapability(ns = ECMExtenderConstants.CAPABILITY_NS_COMPONENT,
