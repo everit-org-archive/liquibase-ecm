@@ -1,7 +1,7 @@
 language: java
 jdk:
   - openjdk7
-script: mvn bundle:install source:jar javadoc:jar
+script: mvn verify
 install: true
 sudo: false
 cache:
