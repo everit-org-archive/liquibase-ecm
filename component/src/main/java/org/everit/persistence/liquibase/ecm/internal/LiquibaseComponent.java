@@ -42,6 +42,7 @@ import org.osgi.framework.Constants;
 import org.osgi.service.log.LogService;
 
 import aQute.bnd.annotation.headers.ProvideCapability;
+import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.changelog.ChangeSet;
@@ -117,7 +118,8 @@ public class LiquibaseComponent implements LiquibaseService {
           new JdbcConnection(dataSource.getConnection()));
       Liquibase liquibase =
           new Liquibase(changeLogFile, new OSGiResourceAccessor(bundle), database);
-      List<ChangeSet> unrunChangeSets = liquibase.listUnrunChangeSets(null, new LabelExpression());
+      List<ChangeSet> unrunChangeSets =
+          liquibase.listUnrunChangeSets(new Contexts((String) null), new LabelExpression());
 
       if (unrunChangeSets.size() > 0) {
         dumpSQL(liquibase, bundle, changeLogFile);
