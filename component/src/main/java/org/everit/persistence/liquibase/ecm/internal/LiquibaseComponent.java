@@ -34,7 +34,6 @@ import org.everit.osgi.ecm.annotation.attribute.BooleanAttribute;
 import org.everit.osgi.ecm.annotation.attribute.StringAttribute;
 import org.everit.osgi.ecm.annotation.attribute.StringAttributes;
 import org.everit.osgi.ecm.extender.ECMExtenderConstants;
-import org.everit.osgi.liquibase.bundle.OSGiResourceAccessor;
 import org.everit.persistence.liquibase.DatabaseMaintenanceException;
 import org.everit.persistence.liquibase.LiquibaseService;
 import org.everit.persistence.liquibase.ecm.LiquibaseConstants;
@@ -43,6 +42,7 @@ import org.osgi.framework.Constants;
 import org.osgi.service.log.LogService;
 
 import aQute.bnd.annotation.headers.ProvideCapability;
+import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -50,6 +50,7 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.osgi.OSGiResourceAccessor;
 
 /**
  * Component for {@link LiquibaseService}.
@@ -116,8 +117,7 @@ public class LiquibaseComponent implements LiquibaseService {
           new JdbcConnection(dataSource.getConnection()));
       Liquibase liquibase =
           new Liquibase(changeLogFile, new OSGiResourceAccessor(bundle), database);
-
-      List<ChangeSet> unrunChangeSets = liquibase.listUnrunChangeSets((String) null);
+      List<ChangeSet> unrunChangeSets = liquibase.listUnrunChangeSets(null, new LabelExpression());
 
       if (unrunChangeSets.size() > 0) {
         dumpSQL(liquibase, bundle, changeLogFile);

@@ -22,12 +22,12 @@
   <parent>
     <groupId>org.everit.config</groupId>
     <artifactId>org.everit.config.oss</artifactId>
-    <version>7.0.1</version>
+    <version>7.2.0</version>
   </parent>
 
   <groupId>org.everit.persistence</groupId>
   <artifactId>org.everit.persistence.liquibase.ecm</artifactId>
-  <version>1.0.0</version>
+  <version>2.0.0-SNAPSHOT</version>
 
   <packaging>bundle</packaging>
 
@@ -96,14 +96,20 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.everit.osgi</groupId>
-      <artifactId>org.everit.osgi.liquibase.bundle</artifactId>
-      <version>3.1.1-v20140507</version>
+      <groupId>org.everit.persistence</groupId>
+      <artifactId>org.everit.persistence.liquibase.ext.osgi</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
+      <version>4.3.1</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
       <version>4.3.1</version>
       <scope>provided</scope>
     </dependency>
